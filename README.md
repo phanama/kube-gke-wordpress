@@ -34,6 +34,11 @@ Steps:
    * example: ./blog_scale.sh wordpress 3
      this will scale your wordpress * 3
 
+## Additions
+
+You can add/edit your "blueprint" in the input/ directory.
+`vim input/wordpress.yml`
+
 ## Tools used
 
 1. Google cloud sdk
