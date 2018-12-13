@@ -1,0 +1,29 @@
+- name: Scale | Ensure deployment directory
+  file:
+    state: directory
+    mode: 0755
+    path: /tmp/deployments/
+
+- name: Scale | Generate manifest
+  template:
+    src: "{{ item.file }}.j2"
+    dest: /tmp/deployments/{{ item.file }}
+    mode: 0644
+  with_items:
+  - name: horizontalpodautoscaler
+    file: horizontalpodautoscaler.yml
+    type: horizontalpodautoscaler
+  register: manifests
+
+- name: Scale | Apply manifests
+  kube:
+    name: "{{ item.item.name }}"
+    namespace: "default"
+    kubectl: "/usr/bin/kubectl"
+    resource: "{{ item.item.type }}"
+    filename: "{{ item.dest }}"
+    state: "latest"
+  with_items: "{{ manifests.results }}"
+
+- name: Scale | Scale manually
+  shell: "kubectl scale deployment --replicas={{ kubernetes.replica * scaling_factor | int}} {{ kubernetes.name }}-wordpress"

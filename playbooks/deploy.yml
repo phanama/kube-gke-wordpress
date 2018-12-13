@@ -1,0 +1,6 @@
+- hosts: localhost
+  vars_files:
+  - "{{ input_file }}"
+  gather_facts: true
+  roles:
+    - role: kubernetes/deploy

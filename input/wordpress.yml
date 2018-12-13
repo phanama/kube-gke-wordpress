@@ -1,0 +1,5 @@
+kubernetes:
+  name: mywordpress-blog
+  type: frontend
+  hostname: myblog.example.com
+  replica: 3

@@ -1,0 +1,14 @@
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ kubernetes.name }}
+  namespace: default
+spec:
+  maxReplicas: {{ kubernetes.replica * 3 | int }}
+  minReplicas: {{ kubernetes.replica }}
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ kubernetes.name }}-wordpress
+  targetCPUUtilizationPercentage: 70

@@ -1,0 +1,35 @@
+- name: Deploy | Ensure deployment directory
+  file:
+    state: directory
+    mode: 0755
+    path: /tmp/deployments/
+
+- name: Deploy | Generate helm values
+  template:
+    src: values.yml.j2
+    dest: /tmp/deployments/values.yml
+    mode: 0644
+
+- name: Deploy | Apply deployment
+  shell: "helm install --name {{ kubernetes.name }} -f /tmp/deployments/values.yml stable/wordpress"
+  ignore_errors: true
+
+- name: Deploy | Get ingress ipaddress
+  shell: kubectl get svc nginx-ingress-controller -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+  register: ingress_ipaddress
+
+- name: Deploy | Add deployment hostname to /etc/hosts
+  lineinfile:
+    path: /etc/hosts
+    line: '{{ ingress_ipaddress.stdout }}    {{ kubernetes.hostname }}'
+    insertbefore: BOF
+  become: true
+  become_method: sudo
+
+- shell: "touch {{current_working_directory}}/.deploy_result"
+
+- name: Deploy | Put deploy message
+  lineinfile:
+    path: "{{ current_working_directory }}/.deploy_result"
+    line: 'Deploy success! You can reach your blog at {{ kubernetes.hostname }} or {{ ingress_ipaddress.stdout}}'
+    insertbefore: BOF
